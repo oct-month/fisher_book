@@ -29,47 +29,4 @@ class BookCollection:
         self.books = [BookView(book) for book in fishbook.books]
         self.keyword = keyword
 
-        
-
-
-
-    # @classmethod
-    # def package_single(cls, data, keyword):
-    #     """处理isbn 搜索时返回的数据"""
-    #     result = {
-    #         "books": [],
-    #         "total": 0,
-    #         "keyword": ""
-    #     }
-    #     if data:
-    #         result["total"] = 1
-    #         result["books"] = [cls.__cut_book_data(data)]
-    #     return result
-        
-    # @classmethod
-    # def package_collection(cls, data, keyword):
-    #     """处理关键字 搜索时返回的数据"""
-    #     result = {
-    #         "books": [],
-    #         "total": 0,
-    #         "keyword": keyword
-    #     }
-    #     if data:
-    #         result["total"] = len(data["total"])
-    #         result["books"] = [cls.__cut_book_data(book) for book in data["books"]]
-    #     return result
-
-    # @classmethod
-    # def __cut_book_data(cls, data):
-    #     """处理book 数据"""
-    #     book = {
-    #         "title": data["title"] or "",
-    #         "author": "、".join(data["author"]),
-    #         "publisher": data["publisher"] or "",
-    #         "price": data["price"] or 0,
-    #         "summary": data["summary"] or "",
-    #         "image": data["image"]
-    #     }
-    #     return book
-
 

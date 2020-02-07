@@ -17,4 +17,3 @@ class TradeInfo:
             "time": single.create_time.strftime("%Y-%m-%d"),
             "id": single.ID
         }
-
