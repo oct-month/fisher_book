@@ -8,6 +8,7 @@ from app.view.wish import MyWishes
 from . import web
 
 @web.route('/my/wish')
+@login_required
 def my_wish():
     uid = current_user.ID
     wishes_of_mine = Wish.get_user_wishes(uid)
