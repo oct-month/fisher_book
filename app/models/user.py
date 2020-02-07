@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import current_app
 from flask_login import UserMixin
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
 from app.web import login_manager
 from app.spider.fishbook import YushuBook
@@ -8,7 +10,7 @@ from app.models.gift import Gift
 from app.models.wish import Wish
 from app.libs.judge import str_is_ISBN
 
-from . import Base
+from . import Base, db
 
 class User(Base, UserMixin):
     """用户的数据库"""
@@ -54,6 +56,25 @@ class User(Base, UserMixin):
         wish = Wish.query.filter_by(uid=self.ID, isbn=isbn, launched=False).first()
         if gift or wish:
             return False
+        return True
+    
+    def generate_token(self, expiration=600):       # 过期时间设置为10分钟
+        """生成一个加密过的ID"""
+        s = Serializer(current_app.config["SECRET_KEY"], expiration)
+        temp = s.dumps({"id": self.ID})     # 返回bytes
+        return temp.decode("utf-8")
+
+    @staticmethod
+    def reset_password(token, new_password):
+        s = Serializer(current_app.config["SECRET_KEY"])
+        try:
+            data = s.loads(token.encode("utf-8"))
+        except Exception:
+            return False
+        uid = data.get("id")    # 查询主键
+        with db.auto_commit():
+            user = User.query.get(uid)
+            user.password = new_password
         return True
     
     def get_id(self):

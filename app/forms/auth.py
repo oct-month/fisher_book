@@ -1,5 +1,5 @@
 from wtforms import Form, StringField, PasswordField
-from wtforms.validators import DataRequired, Length, Email, ValidationError
+from wtforms.validators import DataRequired, Length, Email, ValidationError, EqualTo
 
 from app.models.user import User
 
@@ -22,3 +22,11 @@ class RegisterForm(Form):
             raise ValidationError("昵称已存在")
 
 
+class EmailForm(Form):
+    email = StringField(validators=[DataRequired(), Length(8, 64), Email(message="邮箱地址不符合规范")])
+
+
+class ResetPasswordForm(Form):
+    password1 = PasswordField(validators=[DataRequired(message="密码不能为空"), Length(6, 23)])
+    password2 = PasswordField(validators=[DataRequired(), EqualTo("password1"), Length(6, 23)])
+    
