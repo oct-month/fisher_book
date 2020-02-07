@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>test</title>                     <!-- url 反向构建 -->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='test.css') }}"> 
+    </head>
+    <body>
+        {% block head %}
+            <div>This is a head<br></div>
+        {% endblock %}
+
+        {% block content %}
+            <div>This is a head<br></div>
+        {% endblock %}
+
+        {# 获取flash 消息 #}
+        {# set 定义变量，以block作为作用域 #}
+        {% set messages = get_flashed_messages(category_filter=['error']) %}
+        {{ messages }}<br>
+        {# with 定义局部with内变量 #}
+        {% with messages = get_flashed_messages(category_filter=['warning']) %}
+            {{ messages }}<br>
+        {% endwith %}
+
+        {% block foot %}
+            <div>This is a foot</div>
+        {% endblock %}
+
+    </body>
+</html>

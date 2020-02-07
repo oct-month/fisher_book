@@ -1,0 +1,8 @@
+{# 模板继承 #}
+{% extends "test_layout.html" %}
+{% block content %}
+    {{ super() }}
+    你好
+    {# 管道命令，前一个的结果是后一个的参数 #}
+    {{ data | default("未命名") }}
+{% endblock %}
