@@ -38,6 +38,7 @@ class Drift(Base):
             drift.requester_id = current_user.ID
             drift.requester_nickname = current_user.nickname
             drift.gifter_id = current_gift.user.ID
+            drift.gifter_nickname = current_gift.user.nickname
             book = BookView(current_gift.book)
             drift.book_title = book.title
             drift.book_author = book.author
