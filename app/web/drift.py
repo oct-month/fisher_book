@@ -5,6 +5,8 @@ from sqlalchemy import desc, or_
 from app.models import db
 from app.models.gift import Gift
 from app.models.drift import Drift
+from app.models.user import User
+from app.models.wish import Wish
 from app.forms.drift import DriftForm
 from app.libs.email import send_email
 from app.libs.enums import PendingStatus
@@ -48,19 +50,39 @@ def pending():
 @web.route('/drift/<int:did>/reject')
 @login_required
 def reject_drift(did):
-    pass
+    """拒绝赠送"""
+    drift = Drift.query.filter(Gift.uid==current_user.ID, Drift.ID==did).first_or_404()
+    requester = User.query.get_or_404(drift.requester_id)
+    with db.auto_commit():
+        drift.pending = PendingStatus.Reject
+        requester.beans += 1
+    return redirect(url_for("web.pending"))
+
 
 
 @web.route('/drift/<int:did>/redraw')
 @login_required
 def redraw_drift(did):
-    drift = Drift.query.get_or_404(did)
+    """撤销操作（防范超权）"""
+    drift = Drift.query.filter_by(requester_id=current_user.ID, ID=did).first_or_404()
     with db.auto_commit():
         drift.pending = PendingStatus.Redraw
+        current_user.beans += 1
     return redirect(url_for("web.pending"))
 
 
 @web.route('/drift/<int:did>/mailed')
 @login_required
 def mailed_drift(did):
-    pass
+    """已邮寄"""
+    drift = Drift.query.filter_by(gifter_id=current_user.ID, ID=did).first_or_404()
+    gift = Gift.query.filter_by(ID=drift.gift_id).first_or_404()
+    with db.auto_commit():
+        drift.pending = PendingStatus.Success
+        current_user.beans += 1
+        gift.launched = True
+        # wish 达成
+        Wish.query.filter_by(isbn=drift.isbn, uid=drift.requester_id, 
+            launched=False).update({Wish.launched: True})
+    return redirect(url_for("web.pending"))
+

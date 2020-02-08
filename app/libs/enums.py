@@ -2,10 +2,10 @@ from enum import Enum
 
 class PendingStatus(Enum):
     """交易的4中状态"""
-    Waiting = 1
-    Success = 2
-    Reject = 3
-    Redraw = 4
+    Waiting = 1         # 等待
+    Success = 2         # 已邮寄
+    Reject = 3          # 拒绝
+    Redraw = 4          # 撤销
 
     @classmethod
     def pending_str(cls, status, key):

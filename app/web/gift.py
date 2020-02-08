@@ -4,7 +4,9 @@ from flask import current_app, flash, redirect, url_for, render_template
 from app.models import db
 from app.models.gift import Gift
 from app.models.wish import Wish
+from app.models.drift import Drift
 from app.view.gift import MyGifts
+from app.libs.enums import PendingStatus
 
 from . import web
 
@@ -19,6 +21,7 @@ def my_gifts():
     wish_count_dict = Wish.get_wish_count(isbn_list)
     view_module = MyGifts(gift_of_mine, wish_count_dict)
     return render_template("my_gifts.html", gifts=view_module.gifts)
+
 
 @web.route('/gifts/book/<isbn>')
 @login_required
@@ -36,8 +39,16 @@ def save_to_gifts(isbn):
 
 
 @web.route('/gifts/<gid>/redraw')
+@login_required
 def redraw_from_gifts(gid):
-    pass
-
-
+    """撤销礼物"""
+    gift = Gift.query.filter_by(ID=gid, launched=False).first_or_404()
+    drift = Drift.query.filter_by(gift_id=gid, pending=PendingStatus.Waiting).first()
+    if drift:
+        flash("这个礼物正处于等待状态，请先往鱼漂处理")
+    else:
+        with db.auto_commit():
+            gift.delete()
+            current_user.beans -= current_app.config["BEANS_UPLOAD_ONE_BOOK"]
+    return redirect(url_for("web.my_gifts"))
 

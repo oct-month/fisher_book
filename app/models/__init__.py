@@ -33,6 +33,10 @@ class Base(db.Model):
     def __init__(self):
         self._create_time = time()
 
+    def delete(self):
+        """假删除"""
+        self.status = 0
+
     def __getitem__(self, key):
         """实现dict取值"""
         return getattr(self, key)
