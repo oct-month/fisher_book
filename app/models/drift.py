@@ -1,6 +1,9 @@
 from sqlalchemy import Column, Integer, String, SmallInteger
+from flask_login import current_user
 
-from . import Base
+from app.view.book import BookView
+
+from . import Base, db
 
 class Drift(Base):
     """一次具体的交易信息"""
@@ -24,3 +27,21 @@ class Drift(Base):
     gifter_nickname = Column(String(20))                        # 赠送者昵称
     # 状态
     pending = Column(SmallInteger, default=1)
+
+    @classmethod
+    def save_drift(cls, drift_form, current_gift):
+        """根据表单和gift保存drift"""
+        with db.auto_commit():
+            drift = cls()
+            drift_form.populate_obj(drift)  # 表单的属性赋值方法
+            drift.gift_id = current_gift.ID
+            drift.requester_id = current_user.ID
+            drift.requester_nickname = current_user.nickname
+            drift.gifter_id = current_gift.user.ID
+            book = BookView(current_gift.book.first)
+            drift.book_title = book.title
+            drift.book_author = book.author
+            drift.book_img = book.image
+            drift.isbn = book.isbn
+            current_user.beans -= 1
+            db.session.add(drift)

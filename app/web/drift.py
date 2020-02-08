@@ -1,7 +1,10 @@
-from flask import flash, redirect, render_template, url_for
+from flask import flash, redirect, render_template, url_for, request
 from flask_login import login_required, current_user
 
 from app.models.gift import Gift
+from app.models.drift import Drift
+from app.forms.drift import DriftForm
+from app.libs.email import send_email
 
 from . import web
 
@@ -18,7 +21,14 @@ def send_drift(gid):
     if not can:
         return render_template("not_enough_beans.html", beans=current_user.beans)
     gifter = current_gift.user.summary
-    return render_template("drift.html", gifter=gifter, user_beans=current_user.beans)
+
+    form = DriftForm(request.form)
+    if request.method == "POST" and form.validate():
+        Drift.save_drift(form, current_gift)
+        send_email(current_gift.user.email, "有人想要一本书", "email/get_gift.html", 
+            wisher=current_user, gift=current_gift)
+        return redirect("web.pending")
+    return render_template("drift.html", gifter=gifter, user_beans=current_user.beans, form=form)
 
 
 @web.route('/pending')
