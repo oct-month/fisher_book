@@ -23,6 +23,8 @@ class YushuBook:
             tap.fill_by_bookdict(result)
             with db.auto_commit():
                 db.session.add(tap)
+        else:
+            result.author = result.author.split("、")
 
         self.__fill_single(result)
 

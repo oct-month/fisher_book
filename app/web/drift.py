@@ -1,10 +1,12 @@
 from flask import flash, redirect, render_template, url_for, request
 from flask_login import login_required, current_user
+from sqlalchemy import desc, or_
 
 from app.models.gift import Gift
 from app.models.drift import Drift
 from app.forms.drift import DriftForm
 from app.libs.email import send_email
+from app.view.dirft import DriftCollection
 
 from . import web
 
@@ -27,13 +29,18 @@ def send_drift(gid):
         Drift.save_drift(form, current_gift)
         send_email(current_gift.user.email, "有人想要一本书", "email/get_gift.html", 
             wisher=current_user, gift=current_gift)
-        return redirect("web.pending")
+        return redirect(url_for("web.pending"))
     return render_template("drift.html", gifter=gifter, user_beans=current_user.beans, form=form)
 
 
 @web.route('/pending')
+@login_required
 def pending():
-    pass
+    """查看交易记录"""
+    drifts = Drift.query.filter(or_(Drift.requester_id==current_user.ID, 
+        Drift.gifter_id==current_user.ID)).order_by(desc(Drift._create_time)).all()
+    views = DriftCollection(drifts, current_user.ID)
+    return render_template("pending.html", drifts=views.data)
 
 
 @web.route('/drift/<int:did>/reject')
