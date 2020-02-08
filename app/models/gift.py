@@ -23,6 +23,10 @@ class Gift(Base):
         yu_book.search_by_isbn(self.isbn)
         return yu_book.first
 
+    def is_yourself_gift(self, uid):
+        """判断当前的gift是不是uid的"""
+        return True if self.uid == uid else False
+
     @classmethod
     def get_user_gifts(cls, uid):
         gifts = cls.query.filter_by(uid=uid, launched=False).order_by(

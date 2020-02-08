@@ -8,7 +8,9 @@ from app.web import login_manager
 from app.spider.fishbook import YushuBook
 from app.models.gift import Gift
 from app.models.wish import Wish
+from app.models.drift import Drift
 from app.libs.judge import str_is_ISBN
+from app.libs.enums import PendingStatus
 
 from . import Base, db
 
@@ -42,6 +44,15 @@ class User(Base, UserMixin):
         """检查密码"""
         return check_password_hash(self._password, raw)
 
+    @property
+    def summary(self):
+        return {
+            "nickname": self.nickname,
+            "beans": self.beans,
+            "email": self.email,
+            "send_receive": str(self.send_counter) + "/" + str(self.receive_counter)
+        }
+
     def can_save_to_list(self, isbn):
         # isbn 不合法
         if not str_is_ISBN(isbn):
@@ -58,6 +69,16 @@ class User(Base, UserMixin):
             return False
         return True
     
+    def can_send_drift(self):
+        """判断当前用户能否索要书籍"""
+        # 鱼豆 >= 1
+        if self.beans < 1:
+            return False
+        # 每索取2本书，自己必须送出一本书
+        success_gift_count = Gift.query.filter_by(uid=self.ID, lanuched=True).count()
+        success_receice_count = Drift.query.filter_by(requester_id=self.ID, pending=PendingStatus.Success).count()
+        return True if success_receice_count // 2 <= success_gift_count else False
+
     def generate_token(self, expiration=600):       # 过期时间设置为10分钟
         """生成一个加密过的ID"""
         s = Serializer(current_app.config["SECRET_KEY"], expiration)
