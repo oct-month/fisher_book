@@ -75,7 +75,7 @@ class User(Base, UserMixin):
         if self.beans < 1:
             return False
         # 每索取2本书，自己必须送出一本书
-        success_gift_count = Gift.query.filter_by(uid=self.ID, lanuched=True).count()
+        success_gift_count = Gift.query.filter_by(uid=self.ID, launched=True).count()
         success_receice_count = Drift.query.filter_by(requester_id=self.ID, pending=PendingStatus.Success).count()
         return True if success_receice_count // 2 <= success_gift_count else False
 
