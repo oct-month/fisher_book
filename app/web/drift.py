@@ -2,10 +2,12 @@ from flask import flash, redirect, render_template, url_for, request
 from flask_login import login_required, current_user
 from sqlalchemy import desc, or_
 
+from app.models import db
 from app.models.gift import Gift
 from app.models.drift import Drift
 from app.forms.drift import DriftForm
 from app.libs.email import send_email
+from app.libs.enums import PendingStatus
 from app.view.dirft import DriftCollection
 
 from . import web
@@ -44,15 +46,21 @@ def pending():
 
 
 @web.route('/drift/<int:did>/reject')
+@login_required
 def reject_drift(did):
     pass
 
 
 @web.route('/drift/<int:did>/redraw')
+@login_required
 def redraw_drift(did):
-    pass
+    drift = Drift.query.get_or_404(did)
+    with db.auto_commit():
+        drift.pending = PendingStatus.Redraw
+    return redirect(url_for("web.pending"))
 
 
 @web.route('/drift/<int:did>/mailed')
+@login_required
 def mailed_drift(did):
     pass
