@@ -1,5 +1,4 @@
 #-*- utf-8 -*-
-#!/home/sun/.local/share/virtualenvs/fisher-nGfJvZbA/bin/python
 
 """
 flask 主程序
